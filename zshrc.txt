@@ -1,0 +1,124 @@
+# 1. Fuzzy finder : https://github.com/junegunn/fzf
+
+	# Default options
+
+	export FZF_DEFAULT_OPTS='--history-size=50000 --height 40% --layout=reverse --border'
+
+	# Using fzf to open file in VIM :
+
+	alias fvim='vim $(fzf)'
+	
+	# Browsing search history with fzf :
+
+	fb() {
+  		local cols sep google_history open
+  		cols=$(( COLUMNS / 3 ))
+		sep='{::}'
+
+  		if [ "$(uname)" = "Darwin" ]; then
+    		google_history="$HOME/Library/Application Support/Google/Chrome/Default/History"
+    		open=open
+  		else
+    		google_history="$HOME/.config/google-chrome/Default/History"
+    		open=xdg-open
+  		fi
+  		cp -f "$google_history" /tmp/h
+  		sqlite3 -separator $sep /tmp/h \
+    		"select substr(title, 1, $cols), url
+     		from urls order by last_visit_time desc" |
+  		awk -F $sep '{printf "%-'$cols's  \x1b[36m%s\x1b[m\n", $1, $2}' |
+  		fzf --ansi --multi | sed 's#.*\(https*://\)#\1#' | xargs $open > /dev/null 2> /dev/null
+	}
+
+# 2. Basic commands
+
+	# Lazy create a file.
+	
+	lc()
+	{
+        	touch $1
+        	open $1
+	}
+	
+	# Shortcut for exit.
+	
+	alias x=exit
+	
+	# Executing a shell command in loop.
+	
+	loop() {
+    		while true; do;
+        	eval $1;
+        	sleep 2;
+    		done
+	}
+
+	# Cd move to previous directory
+	
+	cdn(){
+ 	        pathi='';
+        	increment='../'
+        	for i in {1..$1}
+        	do
+                pathi=$pathi$increment
+        	done
+        	cd $pathi;
+	}
+
+	# cd and ls in one command
+
+	cdls(){
+  		cd $1;
+  		ls;
+	}
+
+	# Clear screen
+	
+	clr(){
+        	clear;
+	}
+
+	# Clear current screen history completely
+	
+	csh(){
+        	clear && printf '\e[3J'
+	}
+
+# 3. Git commands
+	
+	# Basic git commands
+
+	alias gd='git diff'
+	alias gst='git status'
+	alias gl='git log'
+	alias gb='git branch'
+	alias gc='git checkout'
+	
+	# View git log in oneline.
+
+	alias glol='git log --pretty=oneline --abbrev-commit' 
+
+# 4. Authentication commands
+
+	# Kerberos authentication.
+	
+	alias ker="kinit -f"
+
+	# Midway authentication.
+	
+	alias mo="mwinit -o"
+
+# 5. Screen commands.
+
+	sc(){
+   		case "$1" in
+        	"l") screen -ls;
+              	;;
+          	"r") screen -r;
+              	;;
+          	"x") pkill SCREEN;
+              	;;
+          	*) screen;
+   		esac
+	}
+
